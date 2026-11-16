@@ -13,22 +13,21 @@
 |---|---|---|
 | 0 | 실험 설계 확정 (B안, 모델 12개) | ✅ 완료 |
 | 1 | 저장소 / 코드 / Seraph 스크립트 준비 | ✅ 완료 |
-| 1 | Seraph 환경 세팅 + 데이터 다운로드 | ⏳ 다음 |
-| 2 | train split 생성 + git 커밋 | ⬜ |
-| 3a | pilot 학습으로 epoch 수 확정 | ⬜ |
-| 3b | ResNet-18 학습 (6개) | ⬜ |
-| 4 | SRI 검증 (ResNet-18) | ⬜ ← **현재 목표** |
-| 3c/4 | ResNet-50 학습 + SRI | ⬜ |
+| 1 | Seraph 환경 세팅 + 데이터 다운로드 | ✅ 완료 (11/16) |
+| 2 | train split 생성 + git 커밋 | ✅ 완료 (11/16) |
+| 3a | pilot 학습으로 epoch 수 확정 | ✅ 30 epoch (11/16) |
+| 3b | ResNet-18 학습 (6개) | ✅ 완료 (11/16, job 220260) |
+| 4 | SRI 검증 (ResNet-18) | ✅ 통과 (11/16) |
+| 3c/4 | ResNet-50 학습 + SRI | ⏳ **다음** |
 | 5 | Attribution 생성 | ⬜ |
 | 6 | Faithfulness 평가 (baseline 5종) | ⬜ |
 | 7–9 | 민감도, 주 분석, 원인 분석 | ⬜ |
 | 10 | 발표 / 보고서 | ⬜ |
 
 ## 다음에 할 일 (위에서부터)
-1. Seraph에 저장소 clone → `scripts/setup_env.sh`, `scripts/download_data.sh` 실행 (`SERAPH_GUIDE.md` 1–3단계)
-2. `src/make_splits.py` 실행 → 출력된 그룹별 개수 확인 → `splits/` 커밋
-3. pilot 제출 → `train_log.csv`에서 train loss/acc가 평평해지는 epoch 확인 → 아래 "결정 기록"에 epoch 수 기록
-4. ResNet-18 본 학습 제출 → `src/aggregate.py`로 SRI 표 생성 → 아래 "결과"에 붙여넣기
+1. ResNet-50 6개 학습 + SRI: `EPOCHS=30 ARCH=resnet50 sbatch scripts/train.sbatch` → `src/aggregate.py` → 아래 결과 표에 추가
+2. 단계 5 준비: attribution(Grad-CAM, IG, RISE) 생성 코드 작성 (`splits/test_xai800.csv` 사용)
+3. 단계 6 준비: baseline 5종(Black, Mean, Blur, Inpainting, Train-set) + Deletion/Insertion/LIF/SRG 구현
 
 ## 결정 기록
 
@@ -42,7 +41,9 @@
 | 2026-11-16 | 모델: ResNet-18/50 × ρ 0.95/0.5 × seed 0–2 = 12개, seed가 subsample과 초기화를 모두 결정 | K-fold 대신 seed로 데이터 조합 변동까지 반영 |
 | 2026-11-16 | 고정 epoch (기본 30, pilot으로 확정), val 없음, test로 결정하지 않음 | 공정 비교, val을 학습에 사용 |
 | 2026-11-16 | SRI = 클래스별 \|P(wb\|water) − P(wb\|land)\| 평균 (공식 test 사용) | 합성 없이 측정 가능 (test는 클래스 내 배경 50:50 무작위) |
-| | epoch 수 확정: __ | pilot 결과 |
+| 2026-11-16 | 데이터는 WILDS 배포본(CodaLab) 사용 | Stanford 원 배포 서버 접속 불가. `make_splits.py`의 원 논문 그룹별 개수 검사 통과 → 원본과 같은 split |
+| 2026-11-16 | conda env는 conda-forge 채널로 생성 | 기본 채널은 Anaconda 이용약관 동의 필요 |
+| 2026-11-16 | **epoch 수 확정: 30** | pilot(R18, ρ 0.95/0.5 seed 0, 50 epoch): 두 모델 모두 ~10 epoch에 train acc 1.0, ~20 epoch에 loss 수렴(≈0.002) → 여유 두고 30 |
 
 ## 결과
 
@@ -51,15 +52,25 @@
 
 | arch | rho | n | avg acc | worst-group acc | group gap | SRI |
 |---|---|---|---|---|---|---|
-| | | | | | | |
+| resnet18 | 0.5 | 3 | 0.936 ± 0.001 | 0.787 ± 0.020 | 0.016 ± 0.001 | 0.014 ± 0.001 |
+| resnet18 | 0.95 | 3 | 0.811 ± 0.005 | 0.339 ± 0.003 | 0.413 ± 0.009 | 0.410 ± 0.010 |
+| resnet50 | 0.5 | | | | | |
+| resnet50 | 0.95 | | | | | |
 
-통과 여부: ⬜ (ρ = 0.95가 seed 3개 모두에서 SRI·group gap 높고 worst-group acc 낮음)
+통과 여부: ✅ ResNet-18 통과 (ρ = 0.95가 seed 3개 모두에서 SRI 0.40–0.42 vs clean 0.012–0.015, worst-group 0.34 vs 0.77–0.81)
+
+해석 메모:
+- shortcut 모델은 같은 클래스에서 배경만 바뀌어도 P(waterbird)가 평균 약 41%p 움직임. clean은 약 1.4%p.
+- clean의 worst-group acc(0.79)가 평균(0.94)보다 낮지만 group gap은 0.016으로 작음 → 배경 때문이 아니라 클래스 자체 난이도/불균형(waterbird가 적음) 영향으로 보임.
 
 ## 실행 기록 (Slurm job)
 
 | 날짜 | job ID | 내용 | 결과 / 메모 |
 |---|---|---|---|
-| | | | |
+| 11/16 | 220250 | pilot: R18 ρ0.95/0.5 seed0, 50 epoch, 평가 생략 | epoch당 2–3초, ~20 epoch 수렴 → 30 확정 |
+| 11/16 | 220260 | R18 본 학습 6개 (30 epoch) + SRI | 전부 정상 종료, SRI 검증 통과 |
 
 ## 이슈 / 메모
-- (막힌 점, 이상한 결과, 나중에 확인할 것)
+- Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함.
+- 처음 가는 노드에서 `conda: command not found` → `source /data/$USER/anaconda3/etc/profile.d/conda.sh` 후 activate (sbatch 스크립트는 이미 이렇게 처리).
+- Seraph 저장소는 repo-local git user 설정(`git config user.name/email`)이 필요했음.
