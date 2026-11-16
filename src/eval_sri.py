@@ -65,7 +65,7 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
     model = build_model(cfg["arch"], pretrained=False)
-    model.load_state_dict(torch.load(run_dir / "final.pt", map_location="cpu"))
+    model.load_state_dict(torch.load(run_dir / "final.pt", map_location="cpu", weights_only=True))
     model.to(device)
 
     test = pd.read_csv(Path(args.split_dir) / "test.csv")
