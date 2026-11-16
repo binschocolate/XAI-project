@@ -1,0 +1,21 @@
+# 실험 결과 (Seraph NAS에만 저장, git에는 올리지 않음)
+outputs/
+logs/*
+!logs/.gitkeep
+data/
+*.pt
+*.pth
+*.npy
+*.tar.gz
+
+# 개인 정보가 들어갈 수 있는 로컬 전용 문서
+docs/SERAPH_GUIDE.md
+
+# python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# os / editor
+.DS_Store
+.idea/

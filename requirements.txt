@@ -1,0 +1,7 @@
+# torch / torchvision은 scripts/setup_env.sh에서 CUDA 버전에 맞춰 따로 설치
+numpy
+pandas
+pillow
+tqdm
+scipy
+matplotlib
