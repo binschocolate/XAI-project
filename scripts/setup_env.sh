@@ -8,7 +8,8 @@ CONDA_ROOT=/data/$USER/anaconda3
 source "$CONDA_ROOT/etc/profile.d/conda.sh"
 
 if ! conda env list | grep -qE '^xai\s'; then
-  conda create -y -n xai python=3.10
+  # 기본 채널은 이용약관(ToS) 동의가 필요해서 conda-forge 사용
+  conda create -y -n xai -c conda-forge --override-channels python=3.10
 fi
 conda activate xai
 
