@@ -19,3 +19,6 @@ __pycache__/
 # os / editor
 .DS_Store
 .idea/
+
+# Claude용 임시 토큰 파일 (절대 커밋 금지)
+.gh_token_for_claude
