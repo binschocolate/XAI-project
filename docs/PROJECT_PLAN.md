@@ -67,7 +67,7 @@
 | 1 | 환경 세팅, Waterbirds 다운로드 | conda env `xai`, tar on NAS |
 | 2 | train split 생성 (B안, seed 3개) | `splits/*.csv` |
 | 3 | 모델 학습 (pilot으로 epoch 확정 → ResNet-18 6개 → ResNet-50 6개) | `results/XAI-project/models/<run>/final.pt` |
-| 4 | **Shortcut reliance 검증**: test 평가 + SRI | `metrics.json`, `sri_summary.csv` |
+| 4 | **Shortcut reliance 검증**: test 평가 + SRI | `metrics.json`, `sri_summary.csv` → git: `results/<arch>/` |
 | 5 | Attribution 생성: Grad-CAM, Integrated Gradients, RISE (+ Random 기준) | attribution 캐시 |
 | 6 | Faithfulness 평가: Deletion(MIF), Insertion, LIF, SRG × baseline 5종 (Black, Mean, Blur, Inpainting, Train-set) | AUC 결과 테이블 |
 | 7 | 민감도 계산: baseline 쌍별 XAI 순위 Kendall τ → 민감도 = 1 − 평균 τ | 모델별 민감도 |

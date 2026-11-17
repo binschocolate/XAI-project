@@ -1,4 +1,4 @@
-# 실험 결과 (Seraph NAS에만 저장, git에는 올리지 않음)
+# 실험 결과 원본은 Seraph NAS에만. git에는 results/<arch>/의 작은 파일만 (checkpoint 제외)
 outputs/
 logs/*
 !logs/.gitkeep

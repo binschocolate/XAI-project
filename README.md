@@ -20,7 +20,9 @@ scripts/
   download_data.sh Waterbirds tar를 NAS에 다운로드
   stage_data.sh    tar를 GPU 노드 /local_datasets에 풀기
   train.sbatch     학습 + SRI 평가 (array 6개)
+  export_results.sh Seraph 결과 중 작은 파일을 results/<arch>/로 복사
 splits/            생성된 split CSV (git으로 공유)
+results/           실험 결과 요약·로그 (git으로 공유, checkpoint 제외) → results/README.md
 logs/              Slurm 로그 (git 제외)
 ```
 
@@ -31,3 +33,4 @@ logs/              Slurm 로그 (git 제외)
 - 결과: `/data/$USER/results/XAI-project/`
 - `models/<arch>_rho<095|050>_seed<k>/`: `config.json`, `train_log.csv`, `final.pt`, `test_preds.csv`, `metrics.json`
 - `sri_runs.csv`, `sri_summary.csv`: 전체 요약
+- git 공유본: `bash scripts/export_results.sh <arch>` → `results/<arch>/`
