@@ -3,7 +3,7 @@
 > 작업할 때마다 이 파일을 업데이트한다. 새로 합류하거나 오랜만에 볼 때 **"지금 어디까지 했고 다음에 뭘 하나"**를 여기서 바로 알 수 있어야 한다.
 > 큰 방향은 [`PROJECT_PLAN.md`](PROJECT_PLAN.md), Seraph 명령은 `SERAPH_GUIDE.md`(로컬 전용).
 
-**마지막 업데이트:** 2026-11-17
+**마지막 업데이트:** 2026-11-18
 
 ---
 
@@ -50,6 +50,8 @@
 ## 결과
 
 ### SRI 검증 (단계 4)
+> 해석과 한계, 다음 단계에 주는 의미: [`ANALYSIS_SRI.md`](ANALYSIS_SRI.md)
+
 `python src/aggregate.py` 출력의 표를 붙여넣는다. 상세(run별 지표, 학습 로그, test 예측)는 [`results/resnet18/`](../results/resnet18/README.md).
 
 | arch | rho | n | avg acc | worst-group acc | group gap | SRI |

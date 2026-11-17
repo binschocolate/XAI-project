@@ -5,6 +5,7 @@
 ## 문서
 - [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md): 연구 질문, 피드백 반영, 실험 설계, 일정
 - [`docs/PROGRESS.md`](docs/PROGRESS.md): **진행 현황 (작업할 때마다 업데이트)**
+- [`docs/ANALYSIS_SRI.md`](docs/ANALYSIS_SRI.md): 단계 4 분석 (shortcut reliance 검증 결과 해석, 한계, 다음 단계 시사점)
 - `docs/SERAPH_GUIDE.md`: Seraph(moana) 실행 명령 모음. **개인 정보가 들어갈 수 있어 git 제외 (각자 로컬에 보관)**
 
 ## 구조
