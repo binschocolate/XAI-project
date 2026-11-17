@@ -25,4 +25,4 @@ results/
 | 단계 | 결과 | 상태 |
 |---|---|---|
 | 4. SRI 검증 | [`resnet18/`](resnet18/README.md) | ✅ |
-| 4. SRI 검증 | `resnet50/` | ⏳ |
+| 4. SRI 검증 | [`resnet50/`](resnet50/README.md) | ✅ |

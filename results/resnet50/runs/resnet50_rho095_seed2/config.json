@@ -1,0 +1,19 @@
+{
+  "arch": "resnet50",
+  "rho": 0.95,
+  "seed": 2,
+  "data_dir": "/local_datasets/hisbulletp/waterbird_complete95_forest2water2",
+  "split_dir": "splits",
+  "out_dir": "/data/hisbulletp/results/XAI-project/models",
+  "epochs": 30,
+  "lr": 0.001,
+  "momentum": 0.9,
+  "wd": 0.0001,
+  "batch_size": 32,
+  "num_workers": 8,
+  "hflip": false,
+  "overwrite": false,
+  "run_name": "resnet50_rho095_seed2",
+  "n_train": 1678,
+  "device": "cuda"
+}
