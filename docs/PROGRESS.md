@@ -19,14 +19,14 @@
 | 3b | ResNet-18 학습 (6개) | ✅ 완료 (11/16, job 220260) |
 | 4 | SRI 검증 (ResNet-18) | ✅ 통과 (11/16) |
 | 4 | ResNet-18 코드·결과 git 정리 (`exp/resnet18-sri` 브랜치, `results/resnet18/`) | ✅ (11/17) |
-| 3c/4 | ResNet-50 학습 + SRI | ⏳ **다음** (제출 여부 확인 필요, 아래 이슈 참고) |
-| 5 | Attribution 생성 | ⬜ |
+| 3c/4 | ResNet-50 학습 + SRI | ✅ 통과 (11/17, job 220467, `exp/resnet50-sri`) |
+| 5 | Attribution 생성 | ⏳ **다음** |
 | 6 | Faithfulness 평가 (baseline 5종) | ⬜ |
 | 7–9 | 민감도, 주 분석, 원인 분석 | ⬜ |
 | 10 | 발표 / 보고서 | ⬜ |
 
 ## 다음에 할 일 (위에서부터)
-1. Seraph 접속 복구 후 ResNet-50 상태 확인 (`squeue -u $USER`, `ls /data/$USER/results/XAI-project/models/`). 없으면 `EPOCHS=30 ARCH=resnet50 sbatch scripts/train.sbatch` → `src/aggregate.py` → `bash scripts/export_results.sh resnet50` → 아래 결과 표와 `results/resnet50/README.md` 작성
+1. Seraph에서 run별 원본 파일 export: `exp/resnet18-sri`에 `export_results.sh resnet18`, `exp/resnet50-sri`에 `export_results.sh resnet50` → 두 브랜치 main에 merge
 2. 단계 5 준비: attribution(Grad-CAM, IG, RISE) 생성 코드 작성 (`splits/test_xai800.csv` 사용)
 3. 단계 6 준비: baseline 5종(Black, Mean, Blur, Inpainting, Train-set) + Deletion/Insertion/LIF/SRG 구현
 
@@ -56,14 +56,16 @@
 |---|---|---|---|---|---|---|
 | resnet18 | 0.5 | 3 | 0.936 ± 0.001 | 0.787 ± 0.020 | 0.016 ± 0.001 | 0.014 ± 0.001 |
 | resnet18 | 0.95 | 3 | 0.811 ± 0.005 | 0.339 ± 0.003 | 0.413 ± 0.009 | 0.410 ± 0.010 |
-| resnet50 | 0.5 | | | | | |
-| resnet50 | 0.95 | | | | | |
+| resnet50 | 0.5 | 3 | 0.953 ± 0.001 | 0.852 ± 0.006 | 0.005 ± 0.004 | 0.005 ± 0.002 |
+| resnet50 | 0.95 | 3 | 0.830 ± 0.006 | 0.541 ± 0.016 | 0.337 ± 0.004 | 0.342 ± 0.007 |
 
 통과 여부: ✅ ResNet-18 통과 (ρ = 0.95가 seed 3개 모두에서 SRI 0.40–0.42 vs clean 0.012–0.015, worst-group 0.34 vs 0.77–0.81)
+통과 여부: ✅ ResNet-50 통과 (ρ = 0.95: SRI 0.33–0.35, worst-group 0.52–0.56 vs clean: SRI 0.004–0.007, worst-group 0.85–0.86). 상세: [`results/resnet50/`](../results/resnet50/README.md)
 
 해석 메모:
 - shortcut 모델은 같은 클래스에서 배경만 바뀌어도 P(waterbird)가 평균 약 41%p 움직임. clean은 약 1.4%p.
 - clean의 worst-group acc(0.79)가 평균(0.94)보다 낮지만 group gap은 0.016으로 작음 → 배경 때문이 아니라 클래스 자체 난이도/불균형(waterbird가 적음) 영향으로 보임.
+- **ResNet-50은 같은 ρ에서도 배경 의존이 더 약함** (shortcut SRI 0.342 vs R18 0.410). 12개 모델의 SRI가 4수준(0.005 / 0.014 / 0.342 / 0.410)으로 나뉘어, 단계 7–8에서 SRI–민감도 관계를 경향으로도 분석 가능.
 
 ## 실행 기록 (Slurm job)
 
@@ -71,9 +73,11 @@
 |---|---|---|---|
 | 11/16 | 220250 | pilot: R18 ρ0.95/0.5 seed0, 50 epoch, 평가 생략 | epoch당 2–3초, ~20 epoch 수렴 → 30 확정 |
 | 11/16 | 220260 | R18 본 학습 6개 (30 epoch) + SRI | 전부 정상 종료, SRI 검증 통과 |
+| 11/17 | 220467 | R50 본 학습 6개 (30 epoch) + SRI | 전부 정상 종료, SRI 검증 통과 |
 
 ## 이슈 / 메모
 - Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함.
 - 처음 가는 노드에서 `conda: command not found` → `source /data/$USER/anaconda3/etc/profile.d/conda.sh` 후 activate (sbatch 스크립트는 이미 이렇게 처리).
 - Seraph 저장소는 repo-local git user 설정(`git config user.name/email`)이 필요했음.
-- 11/16 19:45경부터 moana 외부 접속(30080) 불가: TCP 연결은 되지만 SSH banner가 오지 않음 (서버 쪽 SSH 응답 없음). ResNet-50 제출 여부와 결과는 복구 후 확인 필요.
+- 11/16 19:45경부터 moana 외부 접속(30080) 불가: TCP 연결은 되지만 SSH banner가 오지 않음 (서버 쪽 SSH 응답 없음). 11/17에 복구됨. 장애 전 R50은 제출되지 않았음.
+- Seraph에서 `git fetch` 인증 실패 (저장된 토큰 만료). VSCode 터미널 인증 또는 SSH 키로 해결 필요.
