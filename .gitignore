@@ -3,6 +3,7 @@ outputs/
 logs/*
 !logs/.gitkeep
 data/
+waterbirds_tmp/
 *.pt
 *.pth
 *.npy
