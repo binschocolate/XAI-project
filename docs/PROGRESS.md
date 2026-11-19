@@ -78,7 +78,7 @@
 | 11/17 | 220467 | R50 본 학습 6개 (30 epoch) + SRI | 전부 정상 종료, SRI 검증 통과 |
 
 ## 이슈 / 메모
-- Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함.
+- Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함. → 절차를 [`DATASET.md`](DATASET.md)와 `scripts/prepare_data_local.sh`로 정리 (11/19)
 - 처음 가는 노드에서 `conda: command not found` → `source /data/$USER/anaconda3/etc/profile.d/conda.sh` 후 activate (sbatch 스크립트는 이미 이렇게 처리).
 - Seraph 저장소는 repo-local git user 설정(`git config user.name/email`)이 필요했음.
 - 11/16 19:45경부터 moana 외부 접속(30080) 불가: TCP 연결은 되지만 SSH banner가 오지 않음 (서버 쪽 SSH 응답 없음). 11/17에 복구됨. 장애 전 R50은 제출되지 않았음.

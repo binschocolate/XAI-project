@@ -4,6 +4,7 @@
 
 ## 문서
 - [`docs/PROJECT_PLAN.md`](docs/PROJECT_PLAN.md): 연구 질문, 피드백 반영, 실험 설계, 일정
+- [`docs/DATASET.md`](docs/DATASET.md): **데이터셋 다운로드·업로드 방법 (처음 한 번)**
 - [`docs/PROGRESS.md`](docs/PROGRESS.md): **진행 현황 (작업할 때마다 업데이트)**
 - [`docs/ANALYSIS_SRI.md`](docs/ANALYSIS_SRI.md): 단계 4 분석 (shortcut reliance 검증 결과 해석, 한계, 다음 단계 시사점)
 - `docs/SERAPH_GUIDE.md`: Seraph(moana) 실행 명령 모음. **개인 정보가 들어갈 수 있어 git 제외 (각자 로컬에 보관)**
@@ -18,7 +19,8 @@ src/
   aggregate.py     run별 결과를 표로 정리
 scripts/
   setup_env.sh     conda env 'xai' 생성
-  download_data.sh Waterbirds tar를 NAS에 다운로드
+  prepare_data_local.sh  내 컴퓨터에서 Waterbirds를 받아 Seraph용 tar로 재압축 (docs/DATASET.md)
+  download_data.sh       (사용 중단) Stanford 원 배포처 접속 불가
   stage_data.sh    tar를 GPU 노드 /local_datasets에 풀기
   train.sbatch     학습 + SRI 평가 (array 6개)
   export_results.sh Seraph 결과 중 작은 파일을 results/<arch>/로 복사
