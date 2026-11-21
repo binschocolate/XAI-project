@@ -83,6 +83,17 @@
 - 기법 3개 Kendall τ 민감도(동점 처리 전 1차 계산)는 shortcut/clean 간 방향이 섞임 (MIF: R18 0.222 vs clean 0.178, R50 0.089 vs 0.178) → 단계 7–8 명세대로 재계산 필요
 - 탐색 관찰 (그림 `fig3`, `fig4`): Black → Train-set에서 SRG 하락 폭이 shortcut이 더 큼 (Grad-CAM R18 −0.12 vs −0.05, R50 −0.11 vs −0.03). conflicting 그룹에서 shortcut SRG가 clean보다 높다가 Train-set에서만 비슷해짐
 
+### 단계 7–9 분석 (ariel 실행, kms78299, 11/21) — 1차
+> 명세: PROJECT_PLAN "단계 7–10 상세 실행 계획" · 코드: `src/analysis_stage7_9.py` · 결과·정의·파일 설명: [`results/analysis/README.md`](../results/analysis/README.md)
+
+- 7-0 입력 검증 171항목 통과. 순위 민감도 S = 1 − 평균 Kendall τ-b (동점 처리, scipy 대조 검증), bootstrap 4그룹×200장 2,000회
+- **8-1 주 결과 (MIF, 전체 800장): H2 미지지.** 평균 D = S_shortcut − S_clean: R18 +0.044 (D>0 seed 1/3, 구간 [−0.04, 0.27]), R50 −0.089 (0/3, [−0.22, 0.00])
+- 8-4 SRG 안정화 반대 방향: G = S_MIF − S_SRG 12개 모델 모두 음수 (주 원인: Train-set 에서 Grad-CAM↔RISE 역전)
+- 7-2 보조: baseline별 점수 SD 가 Grad-CAM·RISE 에서 shortcut 이 clean 의 1.3–4.2배 (IG 는 0.6–1.0배)
+- 9-1 탐색: aligned 그룹 MIF D 가 R18 +0.67, R50 +0.71 (seed 3/3, 구간 0 제외). 기법 간 MIF 차이가 shortcut 에서 0.02 수준으로 작아 근소한 차이의 역전으로 보임
+- 9-4 견고성: baseline 하나 제외·공통 정답 subset 에서 D 부호가 바뀜 → 주 결과 약함
+- 미완: 9-3 baseline 구현 문서화, 공통 정답 subset bootstrap, 단계 10
+
 ## 실행 기록 (Slurm job)
 
 | 날짜 | job ID | 내용 | 결과 / 메모 |
