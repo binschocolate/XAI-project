@@ -32,6 +32,16 @@ Baseline (정규화 전 픽셀 공간에서 채움)
 - `<run>/summary.csv`: subset(all / aligned / conflicting) × method × baseline 평균
 - `summary_all.csv`: 12개 run 의 summary.csv 를 합친 것
 - 곡선 원본(`curves.npz`)과 attribution map(`.npy`)은 용량 때문에 git 제외 (ariel `outputs/` 에 있음)
+- `figs/`: `fig1_srg_by_baseline.png`(baseline별 SRG), `fig2_curves_resnet18/50.png`(MIF·LIF 곡선), `fig3_trainset_drop.png`(Black→Train-set SRG 변화), `fig4_group_srg.png`(aligned/conflicting별 SRG) — `python src/plot_faithfulness.py`로 생성
+
+## 재현
+```bash
+python src/attribution.py   --data_dir $DATA_DIR --runs <run> --vis          # 단계 5 -> outputs/attributions/<run>/
+python src/faithfulness.py  --data_dir $DATA_DIR --runs <run>                # 단계 6 -> outputs/faithfulness/<run>/
+python src/plot_faithfulness.py                                              # 그림
+python src/check_ckpts.py   --data_dir $DATA_DIR                             # (선택) checkpoint 로드·팀 결과 대조
+```
+checkpoint 는 `models/<run>/final.pt`, 데이터는 `metadata.csv` 가 있는 Waterbirds 폴더.
 
 ## 1차 관찰 (seed 평균, 통계 검정 전)
 - Random 순서 SRG ≈ 0 (−0.002 ~ 0.007) → 측정 정상
