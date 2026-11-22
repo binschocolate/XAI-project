@@ -94,6 +94,15 @@
 - 9-4 견고성: baseline 하나 제외·공통 정답 subset 에서 D 부호가 바뀜 → 주 결과 약함
 - 미완: 9-3 baseline 구현 문서화, 공통 정답 subset bootstrap, 단계 10
 
+### Baseline 별 OOD 정량화 (ariel 실행, kms78299, 11/23) — 탐색
+> 코드: `src/baseline_ood.py`, `src/plot_baseline_ood.py` · 방법·결과·한계: [`results/baseline_ood/README.md`](../results/baseline_ood/README.md)
+
+- 같은 무작위 patch 를 25/50/75% 지우고 채우는 값만 바꿔 특징 공간에서 ① OOD 정도(Mahalanobis·KNN, 원본 대비 AUROC) ② 정보 잔존(cosine, 예측 유지) 측정. 모델 12개 + ImageNet ResNet-50 기준
+- OOD 순서 (25%, 5종류 모델 모두 동일): **Black > Mean > Train-set > Blur ≈ Inpaint** (AUROC 0.99–1.00 → 0.80–0.91). 정보 잔존은 거의 반대
+- H3-1 부분 지지: Black 은 가장 OOD, Blur 는 가장 덜 OOD
+- OOD 정도는 순위 역전의 주원인과 불일치: 역전은 Train-set 이 주도, 가장 OOD 인 Black 은 역전 거의 없음
+- H3-2: OOD 정도 자체의 shortcut/clean·그룹 간 차이는 작음 (≤0.05). 대신 shortcut 은 conflicting 그룹에서만 Blur·Inpaint 의 예측 유지 이점이 사라짐 (R18 0.60 vs clean 0.84) → 배경 단서 잔존과 분포 이동의 상호작용으로 해석 (피드백 3)
+
 ## 실행 기록 (Slurm job)
 
 | 날짜 | job ID | 내용 | 결과 / 메모 |
@@ -105,6 +114,7 @@
 | 11/19 | 495107, 495108 (ariel) | 단계 5 attribution smoke(16장) / 본 실행 12개 | 정상 종료, RISE R18 ~7분·R50 ~20분/모델 |
 | 11/19 | 495185 (ariel) | 단계 5 vis.png 다시 그리기 (map 재사용) | 정상 종료 |
 | 11/19 | 495236, 495252 (ariel) | 단계 6 faithfulness smoke(16장) / 본 실행 12개 | 정상 종료 |
+| 11/23 | 498742, 498743 (ariel) | baseline OOD 정량화 smoke(16장) / 본 실행 13개 (모델 12 + ImageNet R50) | 정상 종료 |
 
 ## 이슈 / 메모
 - Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함. → 절차를 [`DATASET.md`](DATASET.md)와 `scripts/prepare_data_local.sh`로 정리 (11/19)
