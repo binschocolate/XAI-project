@@ -88,10 +88,10 @@ def parse_run(run):
     return arch, ("shortcut" if rho == "rho095" else "clean"), int(seed[-1])
 
 
-def load_all(froot, aroot, report):
+def load_all(froot, aroot, report, n_expected=12, sri_root=None, fixed_order=False):
     runs = sorted(p.parent.name for p in froot.glob("*/auc.csv"))
     ok = lambda c, msg: report.append(("PASS" if c else "FAIL", msg))
-    ok(len(runs) == 12, f"run 수 = {len(runs)} (기대 12)")
+    ok(len(runs) == n_expected, f"run 수 = {len(runs)} (기대 {n_expected})")
     ref = pd.read_csv(REPO / "splits" / "test_xai800.csv")
     data = {}
     for run in runs:
@@ -124,14 +124,18 @@ def load_all(froot, aroot, report):
         assert list(cur["methods"]) == METHODS and list(cur["baselines"]) == BASES
         p_t = np.where(am.target == 1, am.p_wb, 1 - am.p_wb).astype(np.float32)
         d0 = np.abs(cm[..., 0] - p_t[:, None, None]).max()
-        ok(d0 < 0.02, f"[{run}] 곡선 시작점 vs 원본 예측 확률 최대 차 {d0:.4f} (평가는 fp16 autocast, 허용 0.02)")
+        if fixed_order:  # 다른 모델의 attribution·target 으로 평가 → 시작점이 그 모델 확률과 다른 것이 정상
+            report.append(("INFO", f"[{run}] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 {d0:.4f} (검사 제외)"))
+        else:
+            ok(d0 < 0.02, f"[{run}] 곡선 시작점 vs 원본 예측 확률 최대 차 {d0:.4f} (평가는 fp16 autocast, 허용 0.02)")
         dend = max(np.abs(cm[..., -1] - cm[:, :1, :, -1]).max(), np.abs(cl[..., -1] - cm[:, :1, :, -1]).max())
         ok(dend < 0.02, f"[{run}] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 {dend:.4f} (배치 구성별 fp16 차이, 허용 0.02)")
         # 7. CSV AUC = 곡선 재적분
         rm = np.abs(trap(cm, cur["x"], axis=-1) - mif).max()
         ok(rm < 1e-4, f"[{run}] CSV AUC vs 곡선 재적분 최대 차 {rm:.2e} (곡선 float32 저장)")
         # 9. SRI
-        sri_a = json.loads((REPO / "models" / run / "metrics_ariel.json").read_text())["sri"]
+        sri_path = (Path(sri_root) / run / "metrics.json") if sri_root else (REPO / "models" / run / "metrics_ariel.json")
+        sri_a = json.loads(sri_path.read_text())["sri"]
         tm = REPO / "results" / run.split("_")[0] / "runs" / run / "metrics.json"
         sri_t = json.loads(tm.read_text())["sri"] if tm.exists() else np.nan
         ok(np.isfinite(sri_a), f"[{run}] SRI ariel={sri_a:.4f} team={sri_t:.4f}")
@@ -140,7 +144,7 @@ def load_all(froot, aroot, report):
                          sri=sri_a, sri_team=sri_t, curves=(cm, cl, cur["x"]))
     # run 간 이미지 대응
     files = [tuple(pd.read_csv(aroot / r / "meta.csv").img_filename) for r in runs]
-    ok(len(set(files)) == 1, "12개 run 의 이미지 목록·순서 동일 (img_filename 기준)")
+    ok(len(set(files)) == 1, f"{len(runs)}개 run 의 이미지 목록·순서 동일 (img_filename 기준)")
     return runs, data
 
 
@@ -170,13 +174,16 @@ def main():
     ap.add_argument("--out", default=str(REPO / "outputs" / "analysis"))
     ap.add_argument("--n_boot", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--n_runs", type=int, default=12, help="기대 run 수 (추가 학습 실험은 6)")
+    ap.add_argument("--sri_root", default=None, help="<sri_root>/<run>/metrics.json 에서 SRI 읽기 (기본: models/<run>/metrics_ariel.json)")
+    ap.add_argument("--fixed_order", action="store_true", help="다른 모델의 attribution 으로 평가한 고정 순서 진단 결과")
     args = ap.parse_args()
     out = Path(args.out)
     (out / "figs").mkdir(parents=True, exist_ok=True)
 
     _selftest()
     report = [("PASS", "τ-b 벡터화 구현 = scipy.stats.kendalltau (인공 입력 300개, 동점 포함)")]
-    runs, data = load_all(Path(args.froot), Path(args.aroot), report)
+    runs, data = load_all(Path(args.froot), Path(args.aroot), report, args.n_runs, args.sri_root, args.fixed_order)
     fails = [m for s, m in report if s == "FAIL"]
     (out / "validation_report.md").write_text(
         "# 단계 7-0 입력 검증\n\n" + "\n".join(f"- {s}: {m}" for s, m in report) +
@@ -371,7 +378,7 @@ def make_figs(fdir, pc, sens, meta, runs, data, archs):
                          "axes.edgecolor": "#e4e3df", "font.size": 9, "legend.frameon": False})
     AN = {"resnet18": "ResNet-18", "resnet50": "ResNet-50"}
     # paired plot
-    fig, axes = plt.subplots(1, 4, figsize=(13, 3.6), sharey=True)
+    fig, axes = plt.subplots(1, 2 * len(archs), figsize=(3.3 * 2 * len(archs), 3.6), sharey=True)
     for ax, (arch, q) in zip(axes, [(a, q) for q in ["mif", "srg"] for a in archs]):
         d = pc.query("arch==@arch and metric==@q and scope=='all'")
         for _, row in d.iterrows():
@@ -405,7 +412,7 @@ def make_figs(fdir, pc, sens, meta, runs, data, archs):
     fig.savefig(fdir / "fig_sri_vs_sensitivity.png", dpi=140)
     plt.close(fig)
     # Random curves
-    fig, axes = plt.subplots(len(archs), 5, figsize=(15, 3.2 * len(archs)), sharex=True, sharey=True)
+    fig, axes = plt.subplots(len(archs), 5, figsize=(15, 3.2 * len(archs)), sharex=True, sharey=True, squeeze=False)
     for r_i, arch in enumerate(archs):
         for b_i, b in enumerate(BASES):
             ax = axes[r_i, b_i]

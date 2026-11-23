@@ -103,6 +103,15 @@
 - OOD 정도는 순위 역전의 주원인과 불일치: 역전은 Train-set 이 주도, 가장 OOD 인 Black 은 역전 거의 없음
 - H3-2: OOD 정도 자체의 shortcut/clean·그룹 간 차이는 작음 (≤0.05). 대신 shortcut 은 conflicting 그룹에서만 Blur·Inpaint 의 예측 유지 이점이 사라짐 (R18 0.60 vs clean 0.84) → 배경 단서 잔존과 분포 이동의 상호작용으로 해석 (피드백 3)
 
+### 마스킹 적응 추가 학습 실험 (ariel 실행, kms78299, 11/23) — 원인 탐색
+> 설계·결과·한계: [`results/finetune/README.md`](../results/finetune/README.md) · 코드: `src/finetune_masking.py`, `src/compare_finetune.py`
+
+- R18 checkpoint 6개를 control(원본만) / maskadapt(원본 + 무작위 10–30% 마스킹, baseline 5종)로 5 epoch 추가 학습 (설정은 결과 전에 고정, 두 조건 배치 순서 동일)
+- SRI: shortcut 0.409 → control 0.412 / maskadapt 0.377 (clean 과의 차이 유지 → "비슷"). maskadapt shortcut worst-group 0.33 → 0.26
+- aligned MIF 순위 불안정성 대부분 유지: shortcut S 0.844 / 0.889 / 0.711, D 는 세 조건 모두 seed 3/3 양수. SRG 는 세 조건 동일
+- 고정 순서 진단에서 maskadapt 가 오히려 더 불안정(0.978) → 감소분은 입력 반응보다 설명 변화 쪽
+- 판정: **마스킹에 대한 낯섦만으로 기존 순위 역전을 설명하기 어려움.** 전체 800장 MIF 변화는 control 변동(0.22→0.40)과 같은 잡음 수준이라 해석하지 않음
+
 ## 실행 기록 (Slurm job)
 
 | 날짜 | job ID | 내용 | 결과 / 메모 |
@@ -115,6 +124,7 @@
 | 11/19 | 495185 (ariel) | 단계 5 vis.png 다시 그리기 (map 재사용) | 정상 종료 |
 | 11/19 | 495236, 495252 (ariel) | 단계 6 faithfulness smoke(16장) / 본 실행 12개 | 정상 종료 |
 | 11/23 | 498742, 498743 (ariel) | baseline OOD 정량화 smoke(16장) / 본 실행 13개 (모델 12 + ImageNet R50) | 정상 종료 |
+| 11/23 | 498763 (ariel) | 마스킹 적응 추가 학습 12개 (R18 6개 × control/maskadapt) + SRI 재평가 + attribution + faithfulness(새·고정 순서) | 정상 종료 |
 
 ## 이슈 / 메모
 - Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함. → 절차를 [`DATASET.md`](DATASET.md)와 `scripts/prepare_data_local.sh`로 정리 (11/19)
