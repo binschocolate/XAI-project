@@ -230,7 +230,8 @@ def main():
     ap.add_argument("--attr_root", default=str(REPO / "outputs" / "attributions"))
     ap.add_argument("--out_root", default=str(REPO / "outputs" / "faithfulness"))
     ap.add_argument("--split", default=str(REPO / "splits" / "test_xai800.csv"))
-    ap.add_argument("--methods", nargs="+", default=METHODS, choices=METHODS)
+    ap.add_argument("--methods", nargs="+", default=METHODS,
+                    help="attr_root/<run>/<method>.npy 가 있는 이름 (기본 4종; H3 실험 B 는 bird background random)")
     ap.add_argument("--baselines", nargs="+", default=BASELINES, choices=BASELINES)
     ap.add_argument("--grid", type=int, default=14, help="patch grid (14 -> 14×14 = 196 patch, 16px)")
     ap.add_argument("--step_patches", type=int, default=4, help="곡선 한 점마다 지우는 patch 수")
