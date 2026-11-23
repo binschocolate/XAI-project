@@ -1,0 +1,28 @@
+{
+  "run": "resnet50_rho095_seed1",
+  "reference_model": false,
+  "n_train": 1678,
+  "feat_dim": 2048,
+  "knn_k": 10,
+  "maha": "class-conditional means + shared Ledoit-Wolf covariance, min over classes",
+  "fractions": [
+    0.25,
+    0.5,
+    0.75
+  ],
+  "grid": 14,
+  "mask": "per-image random patch order, seed = mask_seed + attr_idx",
+  "mask_seed": 1000,
+  "blur": {
+    "kernel": 41,
+    "sigma": 8.0
+  },
+  "mean_pixel": [
+    0.41821563243865967,
+    0.4295816719532013,
+    0.3572305142879486
+  ],
+  "trainset_seed": 0,
+  "n_images": 800,
+  "seconds": 215.7
+}
