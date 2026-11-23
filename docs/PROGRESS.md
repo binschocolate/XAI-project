@@ -112,6 +112,21 @@
 - 고정 순서 진단에서 maskadapt 가 오히려 더 불안정(0.978) → 감소분은 입력 반응보다 설명 변화 쪽
 - 판정: **마스킹에 대한 낯섦만으로 기존 순위 역전을 설명하기 어려움.** 전체 800장 MIF 변화는 control 변동(0.22→0.40)과 같은 잡음 수준이라 해석하지 않음
 
+### 진행 중인 실험 (ariel, kms78299, 11/23 제출) — 결과 대기
+> 결과가 나오면 이 소절 아래에 결과 소절을 추가한다. 아래는 무엇이 돌아가고 있는지만 기록.
+
+1. **ROAR** (job 499566, 12개 array, 동시 2개) — `src/roar.py`, 분석 `src/roar_analysis.py`
+   - 모델 12개(R18·R50 × clean/shortcut × seed 0–2). 원래 모델의 Grad-CAM·IG·RISE·Random 으로 14×14 patch 상위 10/30/50/70% 를
+     학습 split(1,678장)과 test_xai800 에서 지우고, **지운 학습 이미지로 처음부터 재학습**(팀 학습과 같은 설정: ImageNet 사전학습, 30 epoch, lr 1e-3)한 뒤 지운 test 정확도 측정
+   - 채우는 값: mean (ROAR 원 논문 방식) / trainset. run 당 재학습 33회 (지우기 0% 1회 포함)
+   - 볼 것: 기법별 ROAR 점수와 Random 대비, mean ↔ trainset 에서 기법 순위가 바뀌는지와 그 변화의 shortcut/clean 차이, ROAR 순위와 Deletion(MIF) 순위의 일치
+   - smoke(job 499555, 학습 16장·1 epoch) 통과
+2. **마스킹 적응 추가 학습 — ResNet-50** (job 499570, ROAR 종료 후 자동 시작 `--dependency=afterany:499566`)
+   - ResNet-18 실험(`results/finetune/`)과 같은 설계·설정을 R50 6개에 적용 (control / maskadapt, 5 epoch, lr 1e-4, 10–30% 마스킹, baseline 5종)
+   - 목적: R18 결론("마스킹 낯섦만으로 순위 역전을 설명하기 어려움")이 아키텍처가 바뀌어도 유지되는지 확인 (원래 결과에서 R18·R50 방향이 달랐던 부분 포함)
+   - smoke(job 499549) 통과. `src/compare_finetune.py` 는 R18·R50 을 함께 비교하도록 수정
+- 코드 수정: `src/faithfulness.py` — attribution 행을 이미지 번호 대신 파일명으로 찾도록 수정 (attribution 을 일부 이미지만 만든 smoke 에서 생기던 IndexError 해결; 800장 전체 실행 결과는 동일)
+
 ## 실행 기록 (Slurm job)
 
 | 날짜 | job ID | 내용 | 결과 / 메모 |
@@ -125,6 +140,10 @@
 | 11/19 | 495236, 495252 (ariel) | 단계 6 faithfulness smoke(16장) / 본 실행 12개 | 정상 종료 |
 | 11/23 | 498742, 498743 (ariel) | baseline OOD 정량화 smoke(16장) / 본 실행 13개 (모델 12 + ImageNet R50) | 정상 종료 |
 | 11/23 | 498763 (ariel) | 마스킹 적응 추가 학습 12개 (R18 6개 × control/maskadapt) + SRI 재평가 + attribution + faithfulness(새·고정 순서) | 정상 종료 |
+| 11/23 | 499555 (ariel) | ROAR smoke (R18 shortcut seed0, 학습 16장·1 epoch) | 정상 종료 |
+| 11/23 | 499566 (ariel) | ROAR 본 실행 12개 (R18·R50) | **진행 중** |
+| 11/23 | 499530, 499549 (ariel) | R50 마스킹 적응 smoke (499530 은 faithfulness 단계 IndexError → 코드 수정 후 499549 통과) | 정상 종료 |
+| 11/23 | 499570 (ariel) | R50 마스킹 적응 본 실행 12개 (ROAR 종료 후 시작) | **대기 중** |
 
 ## 이슈 / 메모
 - Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함. → 절차를 [`DATASET.md`](DATASET.md)와 `scripts/prepare_data_local.sh`로 정리 (11/19)

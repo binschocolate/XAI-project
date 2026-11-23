@@ -143,9 +143,11 @@ def run_one(run, args, xs_pix, meta, fills_train, pix_mean, device, mean, std):
     ameta = pd.read_csv(adir / "meta.csv")
     missing = set(meta.img_filename) - set(ameta.img_filename)
     assert not missing, f"단계 5 결과에 없는 이미지 {len(missing)}장"
-    ameta = ameta.set_index("img_filename").loc[meta.img_filename].reset_index()  # 이 스크립트의 이미지 순서로 정렬
+    # 단계 5 배열에서의 행 번호는 파일명으로 찾는다 (attribution 을 --limit 으로 일부만 만든 경우에도 맞도록)
+    row = pd.Index(ameta.img_filename).get_indexer(meta.img_filename)
+    ameta = ameta.iloc[row].reset_index(drop=True)  # 이 스크립트의 이미지 순서로 정렬
     attrs = {m: np.load(adir / f"{m}.npy", mmap_mode="r") for m in args.methods}
-    a_idx = meta["attr_idx"].values  # 단계 5 배열에서의 행 번호
+    a_idx = meta["attr_idx"].values  # test_xai800 기준 이미지 번호 (출력 기록용)
 
     grid, n_patch = args.grid, args.grid * args.grid
     ks = list(range(0, n_patch + 1, args.step_patches))
@@ -162,7 +164,7 @@ def run_one(run, args, xs_pix, meta, fills_train, pix_mean, device, mean, std):
         target = int(ameta.target[i])
         orders = []
         for m in args.methods:
-            o_mif, o_lif = patch_orders(attrs[m][a_idx[i]], grid)
+            o_mif, o_lif = patch_orders(attrs[m][row[i]], grid)
             orders += [o_mif, o_lif]
         keep = keep_masks(orders, ks, grid, device)  # (nM*2*nP, 1, H, W)
         for b, base in enumerate(args.baselines):
