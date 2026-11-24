@@ -144,6 +144,15 @@
 - 종합: Deletion 평가를 흔드는 것은 baseline 의 OOD 정도보다 **채운 자리에 들어가는 내용**(특히 다른 이미지의 배경·새를 넣는 Train-set)으로 보이며,
   shortcut 모델의 추가 민감도도 주로 그 경우에 나타남
 
+### 기법 확장 견고성 분석: SmoothGrad · LIME 추가 (ariel, kms78299, 11/25)
+> 설계(실행 전 고정) `docs/METHODS_EXT_DESIGN.md` · 결과 [`results/methods_ext/README.md`](../results/methods_ext/README.md). **주 결과는 기법 3개 분석 그대로.**
+
+- 목적: 기법 3개 순위 지표가 거칠어 seed 마다 D 부호가 바뀌던 문제 → 기법 5개(순위 쌍 10개)로 해상도를 높여 확인
+- 확인용: 같은 평가 결과에서 기법 3개로 다시 계산한 값이 기존 주 결과와 정확히 일치
+- 기법 성능(SRG): LIME 0.28–0.44 (RISE 와 최상위), SmoothGrad 0.21–0.25 (baseline 에 거의 둔감). LIME 도 Train-set 에서 하락
+- 전체 800장 MIF D: R18 0.00 [−0.07, 0.08], R50 −0.08 [−0.15, 0.05], seed 별 방향 섞임 → **판정: 주 분석(H2) 미지지를 뒷받침**
+- aligned MIF D: R18 +0.39, R50 +0.41, 두 arch 모두 seed 3/3·구간 0 제외 → 기법 3개 때보다 일관되게 재현. SRG 가 더 불안정(G < 0)한 것도 동일
+
 ## 실행 기록 (Slurm job)
 
 | 날짜 | job ID | 내용 | 결과 / 메모 |
@@ -165,6 +174,7 @@
 | 11/24 | 499570 (ariel) | R50 마스킹 적응 본 실행 12개 | **완료** (위 행 "대기 중" 의 결과) |
 | 11/23 | 499615, 499624 (ariel) | H3 smoke (499615 은 npz 읽기 오류 → 수정 후 499624 통과) | 정상 종료 |
 | 11/24 | 499638, 499649, 499669 (ariel, 분할 제출) | H3 본 실행 6쌍 (실험 A·B, H3-2) | **완료** |
+| 11/25 | 501640 (smoke), 501641 (ariel) | 기법 확장: SmoothGrad·LIME attribution + 6개 기법 faithfulness (모델 12개) | 정상 종료 |
 
 ## 이슈 / 메모
 - Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함. → 절차를 [`DATASET.md`](DATASET.md)와 `scripts/prepare_data_local.sh`로 정리 (11/19)
