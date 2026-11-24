@@ -51,7 +51,8 @@ def rank_sensitivity(Q, bidx=None):
     """Q: (..., 3 method, B baseline) 클수록 좋은 점수 -> S, FlipRate, 유효 쌍 수, 전체 쌍 수"""
     if bidx is not None:
         Q = Q[..., bidx]
-    s = np.stack([np.sign(Q[..., i, :] - Q[..., j, :]) for i, j in [(0, 1), (0, 2), (1, 2)]], -2)  # (...,3,B)
+    item_pairs = list(combinations(range(Q.shape[-2]), 2))  # 기법 쌍 (3개면 3쌍, 5개면 10쌍)
+    s = np.stack([np.sign(Q[..., i, :] - Q[..., j, :]) for i, j in item_pairs], -2)  # (...,쌍,B)
     taus, flips = [], []
     for b1, b2 in combinations(range(Q.shape[-1]), 2):
         num = (s[..., b1] * s[..., b2]).sum(-1)
@@ -69,8 +70,8 @@ def _selftest():
     """작은 인공 입력으로 τ-b·순위 방향·동점 처리를 scipy 와 대조"""
     from scipy.stats import kendalltau
     rng = np.random.default_rng(0)
-    for _ in range(300):
-        Q = rng.integers(0, 3, size=(3, 5)).astype(float)  # 동점 많이
+    for it in range(600):
+        Q = rng.integers(0, 3, size=(3 if it < 300 else 5, 5)).astype(float)  # 동점 많이, 기법 3개·5개
         S, _, nv, _ = rank_sensitivity(Q)
         ts = [kendalltau(Q[:, a], Q[:, b])[0] for a, b in combinations(range(5), 2)]
         ts = [t for t in ts if not np.isnan(t)]
@@ -104,14 +105,15 @@ def load_all(froot, aroot, report, n_expected=12, sri_root=None, fixed_order=Fal
         # 3·4. 키 중복·누락, 행 수
         key = ["img_filename", "method", "baseline"]
         ok(not df.duplicated(key).any(), f"[{run}] (img, method, baseline) 중복 없음")
-        ok(len(df) == 800 * 4 * 5, f"[{run}] auc.csv 행 수 {len(df)} (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)")
+        nm = len(METHODS)
+        ok(len(df) == 800 * nm * 5, f"[{run}] auc.csv 행 수 {len(df)} (= 800×{nm}×5; MIF/LIF 는 열)")
         idx = pd.MultiIndex.from_product([am.img_filename, METHODS, BASES], names=key)
         w = df.set_index(key).reindex(idx)
         ok(not w[["mif_auc", "lif_auc"]].isna().any().any(), f"[{run}] method×baseline 누락 없음")
-        mif = w.mif_auc.values.reshape(800, 4, 5)
-        lif = w.lif_auc.values.reshape(800, 4, 5)
+        mif = w.mif_auc.values.reshape(800, nm, 5)
+        lif = w.lif_auc.values.reshape(800, nm, 5)
         # 2. 설명 대상 = 원본 예측 class, attribution 과 평가가 같은 target
-        tgt = w.target.values.reshape(800, 4, 5)
+        tgt = w.target.values.reshape(800, nm, 5)
         ok((tgt == am.target.values[:, None, None]).all(), f"[{run}] 평가 target = attribution target")
         ok((am.target == am.pred).all(), f"[{run}] target = 원본 예측 class (고정)")
         # 5. 범위
@@ -140,7 +142,7 @@ def load_all(froot, aroot, report, n_expected=12, sri_root=None, fixed_order=Fal
         sri_t = json.loads(tm.read_text())["sri"] if tm.exists() else np.nan
         ok(np.isfinite(sri_a), f"[{run}] SRI ariel={sri_a:.4f} team={sri_t:.4f}")
         data[run] = dict(mif=mif, lif=lif, g=am.group.values, y=am.y.values, pred=am.pred.values,
-                         p_orig=w.p_orig.values.reshape(800, 4, 5), p_full=w.p_full_baseline.values.reshape(800, 4, 5),
+                         p_orig=w.p_orig.values.reshape(800, nm, 5), p_full=w.p_full_baseline.values.reshape(800, nm, 5),
                          sri=sri_a, sri_team=sri_t, curves=(cm, cl, cur["x"]))
     # run 간 이미지 대응
     files = [tuple(pd.read_csv(aroot / r / "meta.csv").img_filename) for r in runs]
@@ -177,12 +179,21 @@ def main():
     ap.add_argument("--n_runs", type=int, default=12, help="기대 run 수 (추가 학습 실험은 6)")
     ap.add_argument("--sri_root", default=None, help="<sri_root>/<run>/metrics.json 에서 SRI 읽기 (기본: models/<run>/metrics_ariel.json)")
     ap.add_argument("--fixed_order", action="store_true", help="다른 모델의 attribution 으로 평가한 고정 순서 진단 결과")
+    ap.add_argument("--xai_methods", nargs="+", default=["gradcam", "ig", "rise"],
+                    help="순위에 넣을 기법 (기본 3개 = 주 분석; 기법 확장 분석은 gradcam ig rise smoothgrad lime)")
     args = ap.parse_args()
+    # 기법 목록 설정: 순위 대상 + random (faithfulness 결과의 method 순서를 따름)
+    global METHODS, XAI, METHOD_PAIRS
+    first = next(Path(args.froot).glob("*/curves.npz"))
+    METHODS = [str(m) for m in np.load(first)["methods"]]
+    assert "random" in METHODS and all(m in METHODS for m in args.xai_methods), (METHODS, args.xai_methods)
+    XAI = list(args.xai_methods)
+    METHOD_PAIRS = list(combinations(XAI, 2))
     out = Path(args.out)
     (out / "figs").mkdir(parents=True, exist_ok=True)
 
     _selftest()
-    report = [("PASS", "τ-b 벡터화 구현 = scipy.stats.kendalltau (인공 입력 300개, 동점 포함)")]
+    report = [("PASS", "τ-b 벡터화 구현 = scipy.stats.kendalltau (인공 입력 600개: 기법 3개·5개, 동점 포함)")]
     runs, data = load_all(Path(args.froot), Path(args.aroot), report, args.n_runs, args.sri_root, args.fixed_order)
     fails = [m for s, m in report if s == "FAIL"]
     (out / "validation_report.md").write_text(

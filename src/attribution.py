@@ -38,6 +38,7 @@ from common import IMAGENET_MEAN, IMAGENET_STD, WaterbirdsDataset, build_model, 
 
 REPO = Path(__file__).resolve().parent.parent
 ALL_METHODS = ["gradcam", "ig", "rise", "random"]
+EXT_METHODS = ["smoothgrad", "lime"]  # 기법 확장 견고성 분석 (2026-11-24 추가, docs/METHODS_EXT_DESIGN.md)
 SIZE = 224
 
 
@@ -114,6 +115,54 @@ def rise(model, x, target, masks, p, mean, std, batch=400, amp=True):
 
 
 # ----------------------------------------------------------------------------- utils
+def smoothgrad(model, x, target, n=50, noise=0.15, chunk=50, seed=0):
+    """Smilkov et al. 2017. x: (3,H,W) 정규화 입력. 노이즈 σ = noise × (x.max − x.min).
+    target logit 의 입력 gradient 를 n 개 노이즈 샘플에서 평균 → 절댓값 → 채널 합 (H,W)"""
+    g = torch.Generator(device=x.device).manual_seed(seed)
+    sigma = noise * (x.max() - x.min())
+    grad_sum = torch.zeros_like(x)
+    for i in range(0, n, chunk):
+        m = min(chunk, n - i)
+        inp = (x[None] + sigma * torch.randn((m, *x.shape), generator=g, device=x.device)).requires_grad_(True)
+        (gr,) = torch.autograd.grad(model(inp)[:, target].sum(), inp)
+        grad_sum += gr.sum(0)
+    return (grad_sum / n).abs().sum(0)
+
+
+@torch.no_grad()
+def lime(model, x, target, mean, std, n_samples=1000, n_segments=50, compactness=10, kernel_width=0.25,
+         batch=250, seed=0, amp=True):
+    """Ribeiro et al. 2016 (lime_image 기본값을 따름). x: (3,H,W) 정규화 입력.
+    SLIC superpixel → 무작위로 켜고 끈 이미지 n_samples 장 (꺼진 superpixel 은 그 superpixel 의 평균색, lime 기본 hide_color=None)
+    → target softmax 확률에 대해 cosine 거리 kernel 가중 Ridge 회귀 → superpixel 계수를 픽셀에 배정 (H,W)"""
+    from skimage.segmentation import slic
+    from sklearn.linear_model import Ridge
+    xp = (x * std + mean).clamp(0, 1)  # 픽셀
+    seg = slic(xp.permute(1, 2, 0).cpu().numpy().astype(np.float64), n_segments=n_segments,
+               compactness=compactness, start_label=0)
+    k = int(seg.max()) + 1
+    seg_t = torch.as_tensor(seg, device=x.device)
+    onehot = F.one_hot(seg_t.flatten(), k).float()  # (HW,k)
+    seg_mean = (xp.flatten(1) @ onehot) / onehot.sum(0).clamp_min(1)  # (3,k)
+    fill = (seg_mean @ onehot.T).view_as(xp)  # superpixel 평균색 이미지
+    rng = np.random.default_rng(seed)
+    Z = rng.integers(0, 2, (n_samples, k)).astype(np.float32)
+    Z[0] = 1  # 첫 샘플 = 원본 (lime 과 같음)
+    probs = []
+    for i in range(0, n_samples, batch):
+        z = torch.as_tensor(Z[i:i + batch], device=x.device)
+        m = (z @ onehot.T).view(-1, 1, *xp.shape[1:])  # (b,1,H,W) 1=켜짐
+        inp = (xp * m + fill * (1 - m) - mean) / std
+        with torch.autocast("cuda", dtype=torch.float16, enabled=amp and x.is_cuda):
+            logits = model(inp)
+        probs.append(F.softmax(logits.float(), 1)[:, target].cpu())
+    y = torch.cat(probs).numpy()
+    d = 1 - (Z @ Z[0]) / (np.linalg.norm(Z, axis=1) * np.linalg.norm(Z[0]) + 1e-12)  # cosine 거리
+    w = np.sqrt(np.exp(-(d ** 2) / kernel_width ** 2))
+    coef = Ridge(alpha=1.0).fit(Z, y, sample_weight=w).coef_.astype(np.float32)
+    return torch.as_tensor(coef, device=x.device)[seg_t], k
+
+
 def load_model(run, ckpt_root, device):
     model = build_model(run.split("_")[0], pretrained=False)
     model.load_state_dict(torch.load(Path(ckpt_root) / run / "final.pt", map_location="cpu", weights_only=True))
@@ -179,7 +228,11 @@ def run_one(run, args, xs, base_meta, device, mean, std, masks):
                ig={"baseline": "pixel black (0)", "steps": args.ig_steps},
                rise={"n_masks": args.rise_n, "grid": args.rise_s, "p": args.rise_p, "fill": "pixel black (0)",
                      "mask_seed": args.mask_seed, "amp_fp16": not args.no_amp},
-               gradcam={"layer": "layer4", "score": "logit"}, random={"seed": "image index"})
+               gradcam={"layer": "layer4", "score": "logit"}, random={"seed": "image index"},
+               smoothgrad={"n": args.sg_n, "noise": args.sg_noise, "map": "|mean grad of target logit| summed over channels"},
+               lime={"n_samples": args.lime_n, "superpixels": f"SLIC n_segments={args.lime_segments}, compactness=10",
+                     "hide": "superpixel mean color (lime default)", "kernel_width": 0.25, "model": "Ridge(alpha=1)",
+                     "score": "softmax prob of target", "amp_fp16": not args.no_amp})
     cfg.setdefault("timing_sec", {})
     if prev_ig_err is not None:
         cfg["ig"]["completeness_rel_err_median"] = prev_ig_err
@@ -212,6 +265,19 @@ def run_one(run, args, xs, base_meta, device, mean, std, masks):
                               args.rise_batch, amp=not args.no_amp).cpu().numpy()
                 if (i + 1) % 100 == 0:
                     print(f"[{run}] rise {i + 1}/{n} ({time.time() - t0:.0f}s)", flush=True)
+        elif method == "smoothgrad":
+            for i in range(n):
+                res[i] = smoothgrad(model, xs[i].to(device), int(target[i]), args.sg_n, args.sg_noise, seed=i).cpu().numpy()
+        elif method == "lime":
+            nseg = []
+            for i in range(n):
+                m_, k = lime(model, xs[i].to(device), int(target[i]), mean, std, args.lime_n, args.lime_segments,
+                             seed=i, amp=not args.no_amp)
+                res[i] = m_.cpu().numpy()
+                nseg.append(k)
+                if (i + 1) % 100 == 0:
+                    print(f"[{run}] lime {i + 1}/{n} ({time.time() - t0:.0f}s)", flush=True)
+            cfg["lime"]["superpixels_per_image_median"] = float(np.median(nseg))
         elif method == "random":
             for i in range(n):
                 res[i] = np.random.default_rng(args.random_seed + i).random((SIZE, SIZE), dtype=np.float32)
@@ -223,8 +289,9 @@ def run_one(run, args, xs, base_meta, device, mean, std, masks):
 
     cfg_path.write_text(json.dumps(cfg, indent=2, ensure_ascii=False))
     if args.vis:
-        save_vis(out / "vis.png", xs, meta, maps, mean, std)
-        print(f"[{run}] vis -> {out / 'vis.png'}", flush=True)
+        vname = "vis.png" if set(args.methods) <= set(ALL_METHODS) else "vis_" + "_".join(args.methods) + ".png"
+        save_vis(out / vname, xs, meta, maps, mean, std)  # 확장 기법만 돌릴 때 기존 vis.png 를 덮어쓰지 않음
+        print(f"[{run}] vis -> {out / vname}", flush=True)
 
 
 def main():
@@ -234,7 +301,11 @@ def main():
     ap.add_argument("--ckpt_root", default=str(REPO / "models"))
     ap.add_argument("--split", default=str(REPO / "splits" / "test_xai800.csv"))
     ap.add_argument("--out_root", default=str(REPO / "outputs" / "attributions"))
-    ap.add_argument("--methods", nargs="+", default=ALL_METHODS, choices=ALL_METHODS)
+    ap.add_argument("--methods", nargs="+", default=ALL_METHODS, choices=ALL_METHODS + EXT_METHODS)
+    ap.add_argument("--sg_n", type=int, default=50)
+    ap.add_argument("--sg_noise", type=float, default=0.15)
+    ap.add_argument("--lime_n", type=int, default=1000)
+    ap.add_argument("--lime_segments", type=int, default=50)
     ap.add_argument("--target", choices=["pred", "label"], default="pred")
     ap.add_argument("--ig_steps", type=int, default=50)
     ap.add_argument("--rise_n", type=int, default=4000)
