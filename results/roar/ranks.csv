@@ -1,0 +1,13 @@
+run,arch,model,seed,tau_mean_vs_trainset,rank_mean,tau_roar_vs_mif_mean,rank_trainset,tau_roar_vs_mif_trainset,flip_mean_vs_trainset,S_roar
+resnet18_rho050_seed0,resnet18,clean,0,1.0,gradcam>ig>rise,-0.33333333333333337,gradcam>ig>rise,-0.33333333333333337,False,0.0
+resnet18_rho050_seed1,resnet18,clean,1,1.0,gradcam>ig>rise,-0.33333333333333337,gradcam>ig>rise,0.33333333333333337,False,0.0
+resnet18_rho050_seed2,resnet18,clean,2,0.33333333333333337,gradcam>rise>ig,0.33333333333333337,gradcam>ig>rise,0.33333333333333337,True,0.6666666666666666
+resnet18_rho095_seed0,resnet18,shortcut,0,1.0,gradcam>ig>rise,-0.33333333333333337,gradcam>ig>rise,-0.33333333333333337,False,0.0
+resnet18_rho095_seed1,resnet18,shortcut,1,1.0,gradcam>ig>rise,-0.33333333333333337,gradcam>ig>rise,-0.33333333333333337,False,0.0
+resnet18_rho095_seed2,resnet18,shortcut,2,1.0,gradcam>ig>rise,-0.33333333333333337,gradcam>ig>rise,-0.33333333333333337,False,0.0
+resnet50_rho050_seed0,resnet50,clean,0,1.0,gradcam>rise>ig,0.33333333333333337,gradcam>rise>ig,1.0,False,0.0
+resnet50_rho050_seed1,resnet50,clean,1,1.0,gradcam>rise>ig,0.33333333333333337,gradcam>rise>ig,1.0,False,0.0
+resnet50_rho050_seed2,resnet50,clean,2,1.0,gradcam>ig>rise,-0.33333333333333337,gradcam>ig>rise,-0.33333333333333337,False,0.0
+resnet50_rho095_seed0,resnet50,shortcut,0,1.0,gradcam>ig>rise,-0.33333333333333337,gradcam>ig>rise,-0.33333333333333337,False,0.0
+resnet50_rho095_seed1,resnet50,shortcut,1,1.0,gradcam>ig>rise,-0.33333333333333337,gradcam>ig>rise,0.33333333333333337,False,0.0
+resnet50_rho095_seed2,resnet50,shortcut,2,1.0,gradcam>ig>rise,-0.33333333333333337,gradcam>ig>rise,-0.33333333333333337,False,0.0

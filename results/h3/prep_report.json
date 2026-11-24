@@ -1,0 +1,9 @@
+{
+  "n_test": 800,
+  "n_pool": 5994,
+  "seg_resized": 0,
+  "test_bird_area_mean": 0.1750285245934311,
+  "bank_per_place": 64,
+  "n_donor": 4,
+  "seed": 0
+}

@@ -1,0 +1,20 @@
+{
+  "arch": "resnet50",
+  "seed": 2,
+  "runs": {
+    "clean": "resnet50_rho050_seed2",
+    "shortcut": "resnet50_rho095_seed2"
+  },
+  "n_images": 800,
+  "limit": null,
+  "taus": [
+    0.02,
+    0.05
+  ],
+  "grid": 4,
+  "n_donor_per_place": 4,
+  "columns_A": "baseline x5 | same-place x4 | opposite-place x4",
+  "columns_S2": "baseline x5 | same-place natural x4",
+  "ref": "ImageNet ResNet-50, single-Gaussian Mahalanobis",
+  "seconds": 393.4
+}

@@ -1,0 +1,175 @@
+# 단계 7-0 입력 검증
+
+- PASS: τ-b 벡터화 구현 = scipy.stats.kendalltau (인공 입력 300개, 동점 포함)
+- PASS: run 수 = 12 (기대 12)
+- PASS: [resnet18_rho050_seed0] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet18_rho050_seed0] 그룹별 200장
+- PASS: [resnet18_rho050_seed0] (img, method, baseline) 중복 없음
+- PASS: [resnet18_rho050_seed0] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet18_rho050_seed0] method×baseline 누락 없음
+- PASS: [resnet18_rho050_seed0] 평가 target = attribution target
+- PASS: [resnet18_rho050_seed0] target = 원본 예측 class (고정)
+- PASS: [resnet18_rho050_seed0] MIF 유한·범위 [0.000, 1.000]
+- PASS: [resnet18_rho050_seed0] LIF 유한·범위 [0.005, 1.000]
+- PASS: [resnet18_rho050_seed0] SRG 유한·범위 [-0.715, 0.959]
+- INFO: [resnet18_rho050_seed0] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.6923 (검사 제외)
+- PASS: [resnet18_rho050_seed0] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet18_rho050_seed0] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet18_rho050_seed0] SRI ariel=0.0058 team=0.0153
+- PASS: [resnet18_rho050_seed1] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet18_rho050_seed1] 그룹별 200장
+- PASS: [resnet18_rho050_seed1] (img, method, baseline) 중복 없음
+- PASS: [resnet18_rho050_seed1] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet18_rho050_seed1] method×baseline 누락 없음
+- PASS: [resnet18_rho050_seed1] 평가 target = attribution target
+- PASS: [resnet18_rho050_seed1] target = 원본 예측 class (고정)
+- PASS: [resnet18_rho050_seed1] MIF 유한·범위 [0.001, 1.000]
+- PASS: [resnet18_rho050_seed1] LIF 유한·범위 [0.011, 1.000]
+- PASS: [resnet18_rho050_seed1] SRG 유한·범위 [-0.751, 0.972]
+- INFO: [resnet18_rho050_seed1] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.6783 (검사 제외)
+- PASS: [resnet18_rho050_seed1] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet18_rho050_seed1] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet18_rho050_seed1] SRI ariel=0.0016 team=0.0125
+- PASS: [resnet18_rho050_seed2] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet18_rho050_seed2] 그룹별 200장
+- PASS: [resnet18_rho050_seed2] (img, method, baseline) 중복 없음
+- PASS: [resnet18_rho050_seed2] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet18_rho050_seed2] method×baseline 누락 없음
+- PASS: [resnet18_rho050_seed2] 평가 target = attribution target
+- PASS: [resnet18_rho050_seed2] target = 원본 예측 class (고정)
+- PASS: [resnet18_rho050_seed2] MIF 유한·범위 [0.005, 1.000]
+- PASS: [resnet18_rho050_seed2] LIF 유한·범위 [0.010, 1.000]
+- PASS: [resnet18_rho050_seed2] SRG 유한·범위 [-0.810, 0.955]
+- INFO: [resnet18_rho050_seed2] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.7919 (검사 제외)
+- PASS: [resnet18_rho050_seed2] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet18_rho050_seed2] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet18_rho050_seed2] SRI ariel=0.0041 team=0.0145
+- PASS: [resnet18_rho095_seed0] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet18_rho095_seed0] 그룹별 200장
+- PASS: [resnet18_rho095_seed0] (img, method, baseline) 중복 없음
+- PASS: [resnet18_rho095_seed0] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet18_rho095_seed0] method×baseline 누락 없음
+- PASS: [resnet18_rho095_seed0] 평가 target = attribution target
+- PASS: [resnet18_rho095_seed0] target = 원본 예측 class (고정)
+- PASS: [resnet18_rho095_seed0] MIF 유한·범위 [0.002, 1.000]
+- PASS: [resnet18_rho095_seed0] LIF 유한·범위 [0.005, 1.000]
+- PASS: [resnet18_rho095_seed0] SRG 유한·범위 [-0.710, 0.974]
+- INFO: [resnet18_rho095_seed0] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.8126 (검사 제외)
+- PASS: [resnet18_rho095_seed0] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet18_rho095_seed0] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet18_rho095_seed0] SRI ariel=0.3663 team=0.4063
+- PASS: [resnet18_rho095_seed1] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet18_rho095_seed1] 그룹별 200장
+- PASS: [resnet18_rho095_seed1] (img, method, baseline) 중복 없음
+- PASS: [resnet18_rho095_seed1] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet18_rho095_seed1] method×baseline 누락 없음
+- PASS: [resnet18_rho095_seed1] 평가 target = attribution target
+- PASS: [resnet18_rho095_seed1] target = 원본 예측 class (고정)
+- PASS: [resnet18_rho095_seed1] MIF 유한·범위 [0.002, 1.000]
+- PASS: [resnet18_rho095_seed1] LIF 유한·범위 [0.008, 1.000]
+- PASS: [resnet18_rho095_seed1] SRG 유한·범위 [-0.774, 0.961]
+- INFO: [resnet18_rho095_seed1] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.5828 (검사 제외)
+- PASS: [resnet18_rho095_seed1] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet18_rho095_seed1] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet18_rho095_seed1] SRI ariel=0.3819 team=0.4026
+- PASS: [resnet18_rho095_seed2] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet18_rho095_seed2] 그룹별 200장
+- PASS: [resnet18_rho095_seed2] (img, method, baseline) 중복 없음
+- PASS: [resnet18_rho095_seed2] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet18_rho095_seed2] method×baseline 누락 없음
+- PASS: [resnet18_rho095_seed2] 평가 target = attribution target
+- PASS: [resnet18_rho095_seed2] target = 원본 예측 class (고정)
+- PASS: [resnet18_rho095_seed2] MIF 유한·범위 [0.001, 1.000]
+- PASS: [resnet18_rho095_seed2] LIF 유한·범위 [0.003, 1.000]
+- PASS: [resnet18_rho095_seed2] SRG 유한·범위 [-0.563, 0.948]
+- INFO: [resnet18_rho095_seed2] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.7101 (검사 제외)
+- PASS: [resnet18_rho095_seed2] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet18_rho095_seed2] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet18_rho095_seed2] SRI ariel=0.3824 team=0.4220
+- PASS: [resnet50_rho050_seed0] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet50_rho050_seed0] 그룹별 200장
+- PASS: [resnet50_rho050_seed0] (img, method, baseline) 중복 없음
+- PASS: [resnet50_rho050_seed0] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet50_rho050_seed0] method×baseline 누락 없음
+- PASS: [resnet50_rho050_seed0] 평가 target = attribution target
+- PASS: [resnet50_rho050_seed0] target = 원본 예측 class (고정)
+- PASS: [resnet50_rho050_seed0] MIF 유한·범위 [0.001, 1.000]
+- PASS: [resnet50_rho050_seed0] LIF 유한·범위 [0.007, 1.000]
+- PASS: [resnet50_rho050_seed0] SRG 유한·범위 [-0.760, 0.954]
+- INFO: [resnet50_rho050_seed0] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.8923 (검사 제외)
+- PASS: [resnet50_rho050_seed0] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet50_rho050_seed0] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet50_rho050_seed0] SRI ariel=0.0119 team=0.0071
+- PASS: [resnet50_rho050_seed1] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet50_rho050_seed1] 그룹별 200장
+- PASS: [resnet50_rho050_seed1] (img, method, baseline) 중복 없음
+- PASS: [resnet50_rho050_seed1] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet50_rho050_seed1] method×baseline 누락 없음
+- PASS: [resnet50_rho050_seed1] 평가 target = attribution target
+- PASS: [resnet50_rho050_seed1] target = 원본 예측 class (고정)
+- PASS: [resnet50_rho050_seed1] MIF 유한·범위 [0.003, 1.000]
+- PASS: [resnet50_rho050_seed1] LIF 유한·범위 [0.002, 1.000]
+- PASS: [resnet50_rho050_seed1] SRG 유한·범위 [-0.695, 0.959]
+- INFO: [resnet50_rho050_seed1] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.8745 (검사 제외)
+- PASS: [resnet50_rho050_seed1] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet50_rho050_seed1] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet50_rho050_seed1] SRI ariel=0.0112 team=0.0035
+- PASS: [resnet50_rho050_seed2] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet50_rho050_seed2] 그룹별 200장
+- PASS: [resnet50_rho050_seed2] (img, method, baseline) 중복 없음
+- PASS: [resnet50_rho050_seed2] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet50_rho050_seed2] method×baseline 누락 없음
+- PASS: [resnet50_rho050_seed2] 평가 target = attribution target
+- PASS: [resnet50_rho050_seed2] target = 원본 예측 class (고정)
+- PASS: [resnet50_rho050_seed2] MIF 유한·범위 [0.001, 1.000]
+- PASS: [resnet50_rho050_seed2] LIF 유한·범위 [0.008, 1.000]
+- PASS: [resnet50_rho050_seed2] SRG 유한·범위 [-0.771, 0.965]
+- INFO: [resnet50_rho050_seed2] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.8947 (검사 제외)
+- PASS: [resnet50_rho050_seed2] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet50_rho050_seed2] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet50_rho050_seed2] SRI ariel=0.0169 team=0.0042
+- PASS: [resnet50_rho095_seed0] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet50_rho095_seed0] 그룹별 200장
+- PASS: [resnet50_rho095_seed0] (img, method, baseline) 중복 없음
+- PASS: [resnet50_rho095_seed0] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet50_rho095_seed0] method×baseline 누락 없음
+- PASS: [resnet50_rho095_seed0] 평가 target = attribution target
+- PASS: [resnet50_rho095_seed0] target = 원본 예측 class (고정)
+- PASS: [resnet50_rho095_seed0] MIF 유한·범위 [0.001, 1.000]
+- PASS: [resnet50_rho095_seed0] LIF 유한·범위 [0.004, 1.000]
+- PASS: [resnet50_rho095_seed0] SRG 유한·범위 [-0.684, 0.957]
+- INFO: [resnet50_rho095_seed0] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.8064 (검사 제외)
+- PASS: [resnet50_rho095_seed0] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet50_rho095_seed0] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet50_rho095_seed0] SRI ariel=0.3449 team=0.3477
+- PASS: [resnet50_rho095_seed1] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet50_rho095_seed1] 그룹별 200장
+- PASS: [resnet50_rho095_seed1] (img, method, baseline) 중복 없음
+- PASS: [resnet50_rho095_seed1] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet50_rho095_seed1] method×baseline 누락 없음
+- PASS: [resnet50_rho095_seed1] 평가 target = attribution target
+- PASS: [resnet50_rho095_seed1] target = 원본 예측 class (고정)
+- PASS: [resnet50_rho095_seed1] MIF 유한·범위 [0.001, 1.000]
+- PASS: [resnet50_rho095_seed1] LIF 유한·범위 [0.011, 1.000]
+- PASS: [resnet50_rho095_seed1] SRG 유한·범위 [-0.703, 0.972]
+- INFO: [resnet50_rho095_seed1] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.8290 (검사 제외)
+- PASS: [resnet50_rho095_seed1] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet50_rho095_seed1] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet50_rho095_seed1] SRI ariel=0.3550 team=0.3449
+- PASS: [resnet50_rho095_seed2] attribution meta 순서 = test_xai800.csv
+- PASS: [resnet50_rho095_seed2] 그룹별 200장
+- PASS: [resnet50_rho095_seed2] (img, method, baseline) 중복 없음
+- PASS: [resnet50_rho095_seed2] auc.csv 행 수 16000 (= 800×4×5; MIF/LIF 는 열 → long 형식 32,000행에 해당)
+- PASS: [resnet50_rho095_seed2] method×baseline 누락 없음
+- PASS: [resnet50_rho095_seed2] 평가 target = attribution target
+- PASS: [resnet50_rho095_seed2] target = 원본 예측 class (고정)
+- PASS: [resnet50_rho095_seed2] MIF 유한·범위 [0.001, 1.000]
+- PASS: [resnet50_rho095_seed2] LIF 유한·범위 [0.002, 1.000]
+- PASS: [resnet50_rho095_seed2] SRG 유한·범위 [-0.644, 0.956]
+- INFO: [resnet50_rho095_seed2] 고정 순서 진단: 곡선 시작점 vs attribution 모델 확률 최대 차 0.8283 (검사 제외)
+- PASS: [resnet50_rho095_seed2] 완전 삭제 끝점 method·MIF/LIF 간 최대 차 0.0000 (배치 구성별 fp16 차이, 허용 0.02)
+- PASS: [resnet50_rho095_seed2] CSV AUC vs 곡선 재적분 최대 차 1.11e-16 (곡선 float32 저장)
+- PASS: [resnet50_rho095_seed2] SRI ariel=0.3239 team=0.3343
+- PASS: 12개 run 의 이미지 목록·순서 동일 (img_filename 기준)
+
+**결과: 모두 통과**
