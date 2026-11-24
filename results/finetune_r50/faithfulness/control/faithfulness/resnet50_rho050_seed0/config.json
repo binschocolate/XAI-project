@@ -1,0 +1,35 @@
+{
+  "run": "resnet50_rho050_seed0",
+  "n_images": 800,
+  "methods": [
+    "gradcam",
+    "ig",
+    "rise",
+    "random"
+  ],
+  "baselines": [
+    "black",
+    "mean",
+    "blur",
+    "inpaint",
+    "trainset"
+  ],
+  "grid": 14,
+  "patch_px": 16,
+  "step_patches": 4,
+  "n_points": 50,
+  "score": "softmax prob of target",
+  "target_source": "/ceph_data/kms78299/repos/XAI/outputs/ft/control/attributions/resnet50_rho050_seed0/meta.csv",
+  "blur": {
+    "kernel": 41,
+    "sigma": 8.0
+  },
+  "mean_pixel": [
+    0.41821563243865967,
+    0.4295816719532013,
+    0.3572305142879486
+  ],
+  "trainset_seed": 0,
+  "amp_fp16": true,
+  "seconds": 630.6
+}

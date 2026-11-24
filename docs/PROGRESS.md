@@ -127,6 +127,23 @@
    - smoke(job 499549) 통과. `src/compare_finetune.py` 는 R18·R50 을 함께 비교하도록 수정
 - 코드 수정: `src/faithfulness.py` — attribution 행을 이미지 번호 대신 파일명으로 찾도록 수정 (attribution 을 일부 이미지만 만든 smoke 에서 생기던 IndexError 해결; 800장 전체 실행 결과는 동일)
 
+### 결과: ROAR · 마스킹 적응 R50 · H3 (ariel, kms78299, 11/24)
+> 위 "진행 중인 실험" 소절의 실험 결과. 상세는 각 README.
+
+- **ROAR** ([`results/roar/README.md`](../results/roar/README.md)): 재학습하면 mean ↔ trainset 기법 순위가 12개 중 11개에서 동일 (D_roar = 0) —
+  Deletion 의 baseline 의존 순위 변화가 사라짐. ROAR 순위는 대체로 Grad-CAM > IG > RISE 이고 RISE 는 33–83% 만 Random 보다 나음,
+  ROAR 와 MIF 순위는 대체로 불일치 (τ −0.33 ~ +0.11). 한계: 지운 모양을 통한 정보 누출 가능성 (F-Fidelity 지적), baseline 2종
+- **마스킹 적응 R18+R50** ([`results/finetune_r50/README.md`](../results/finetune_r50/README.md), R18 단독 결과 `results/finetune/` 는 그대로):
+  R50 SRI 0.344 → 0.342 / 0.341 (비슷). shortcut aligned MIF 순위 민감도 R50 0.933 → control 0.933 / maskadapt 0.578 (고정 순서 진단도 0.756 으로 감소),
+  R18 0.844 → 0.889 / 0.711. 판정: 낯섦이 일부 기여(R50)하나 두 arch 모두 불안정성이 남아 그것만으로는 설명되지 않음
+- **H3-1** ([`results/h3/README.md`](../results/h3/README.md), 설계 `docs/H3_DESIGN.md`): clean 모델의 배경을 OOD baseline(Black·Mean·Blur·Inpaint)으로
+  가려도 같은 장소 자연 배경 교체보다 더 흔들리지 않음 (R50 Black 만 +0.03), 왜곡은 Train-set (+0.06, 3/3). 틀린 배경 설명은 모든 baseline 에서 Random 보다
+  나쁘게 평가됨. 자동 판정: **원인은 OOD 가 아니라 채운 내용** (H3-1 문장 그대로는 미지지)
+- **H3-2**: 공통으로 안 보는 칸 진행 기준 통과 (≥2칸 이미지 55–61%). shortcut − clean 반응 차이는 Train-set 에서 두 arch 모두 +0.07 (3/3),
+  R50 만 Mean·Inpaint·Black 에서 +0.02–0.03. 자동 판정: **부분적**. 한계: 공통 칸 전체를 자연 배경으로 바꿔도 Δp 0.08–0.13 (칸 단위 판정은 근사)
+- 종합: Deletion 평가를 흔드는 것은 baseline 의 OOD 정도보다 **채운 자리에 들어가는 내용**(특히 다른 이미지의 배경·새를 넣는 Train-set)으로 보이며,
+  shortcut 모델의 추가 민감도도 주로 그 경우에 나타남
+
 ## 실행 기록 (Slurm job)
 
 | 날짜 | job ID | 내용 | 결과 / 메모 |
@@ -144,6 +161,10 @@
 | 11/23 | 499566 (ariel) | ROAR 본 실행 12개 (R18·R50) | **진행 중** |
 | 11/23 | 499530, 499549 (ariel) | R50 마스킹 적응 smoke (499530 은 faithfulness 단계 IndexError → 코드 수정 후 499549 통과) | 정상 종료 |
 | 11/23 | 499570 (ariel) | R50 마스킹 적응 본 실행 12개 (ROAR 종료 후 시작) | **대기 중** |
+| 11/24 | 499566 (ariel) | ROAR 본 실행 12개 | **완료** (위 행 "진행 중" 의 결과) |
+| 11/24 | 499570 (ariel) | R50 마스킹 적응 본 실행 12개 | **완료** (위 행 "대기 중" 의 결과) |
+| 11/23 | 499615, 499624 (ariel) | H3 smoke (499615 은 npz 읽기 오류 → 수정 후 499624 통과) | 정상 종료 |
+| 11/24 | 499638, 499649, 499669 (ariel, 분할 제출) | H3 본 실행 6쌍 (실험 A·B, H3-2) | **완료** |
 
 ## 이슈 / 메모
 - Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함. → 절차를 [`DATASET.md`](DATASET.md)와 `scripts/prepare_data_local.sh`로 정리 (11/19)

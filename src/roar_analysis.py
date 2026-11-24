@@ -110,10 +110,10 @@ def make_fig(d):
                     ax.set_xlabel("fraction of patches removed (train and test)")
                 if c == 0:
                     ax.set_ylabel("test accuracy after retraining")
-        fig.legend(*axes[0, 0].get_legend_handles_labels(), loc="upper right", ncol=4)
         name = {"resnet18": "ResNet-18", "resnet50": "ResNet-50"}[arch]
-        fig.suptitle(f"{name}: ROAR curves (lower = more important regions removed; seed mean)", x=0.01, ha="left")
-        fig.tight_layout(rect=(0, 0, 1, 0.93))
+        fig.suptitle(f"{name}: ROAR curves (lower = more important regions removed; seed mean)", x=0.01, y=0.99, ha="left")
+        fig.legend(*axes[0, 0].get_legend_handles_labels(), loc="upper left", bbox_to_anchor=(0.01, 0.95), ncol=4)
+        fig.tight_layout(rect=(0, 0, 1, 0.89))
         fig.savefig(OUT / "figs" / f"fig_roar_curves_{arch}.png", dpi=140)
         plt.close(fig)
 

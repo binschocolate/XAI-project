@@ -1,0 +1,42 @@
+{
+  "data_dir": "/ceph_data/kms78299/repos/XAI/data/waterbird_complete95_forest2water2",
+  "run": "resnet18_rho050_seed0",
+  "attr_train_root": "/ceph_data/kms78299/repos/XAI/outputs/roar/attr_train",
+  "attr_test_root": "/ceph_data/kms78299/repos/XAI/outputs/attributions",
+  "out_root": "/ceph_data/kms78299/repos/XAI/outputs/roar",
+  "split": "/ceph_data/kms78299/repos/XAI/splits/test_xai800.csv",
+  "methods": [
+    "gradcam",
+    "ig",
+    "rise",
+    "random"
+  ],
+  "baselines": [
+    "mean",
+    "trainset"
+  ],
+  "fractions": [
+    0.1,
+    0.3,
+    0.5,
+    0.7
+  ],
+  "grid": 14,
+  "epochs": 30,
+  "lr": 0.001,
+  "wd": 0.0001,
+  "batch_size": 32,
+  "donor_seed": 0,
+  "num_workers": 8,
+  "limit_train": null,
+  "overwrite": false,
+  "arch": "resnet18",
+  "seed": 0,
+  "n_train": 1678,
+  "n_test": 800,
+  "n_conditions": 33,
+  "init": "ImageNet pretrained (team build_model)",
+  "train_donor": "same split, fixed per image (donor_seed + seed)",
+  "test_donor": "stage-6 trainset fills (seed 0)",
+  "seconds_total": 1797.6
+}

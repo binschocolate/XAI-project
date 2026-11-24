@@ -74,7 +74,8 @@ def main():
     out = Path(args.out_root) / f"{args.arch}_seed{args.seed}"
     out.mkdir(parents=True, exist_ok=True)
     prep = Path(args.prep)
-    tm, bank, don = np.load(prep / "test_masks.npz"), np.load(prep / "bank.npz"), np.load(prep / "donors.npz")
+    # 파일명 배열이 object 형식으로 저장돼 있어 allow_pickle 필요 (우리가 만든 파일만 읽음)
+    tm, bank, don = (np.load(prep / f, allow_pickle=True) for f in ("test_masks.npz", "bank.npz", "donors.npz"))
 
     df = pd.read_csv(REPO / "splits" / "test_xai800.csv")
     df["idx"] = np.arange(len(df))
