@@ -26,7 +26,7 @@ def seed_worker(worker_id, base=0):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--arch", choices=["resnet18", "resnet50"], required=True)
-    ap.add_argument("--rho", type=float, choices=[0.5, 0.95], required=True)
+    ap.add_argument("--rho", type=float, choices=[0.5, 0.75, 0.95, 0.99], required=True)  # 0.75, 0.99: rho 수준 추가 실험
     ap.add_argument("--seed", type=int, required=True)
     ap.add_argument("--data_dir", required=True)
     ap.add_argument("--split_dir", default="splits")

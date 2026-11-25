@@ -153,6 +153,22 @@
 - 전체 800장 MIF D: R18 0.00 [−0.07, 0.08], R50 −0.08 [−0.15, 0.05], seed 별 방향 섞임 → **판정: 주 분석(H2) 미지지를 뒷받침**
 - aligned MIF D: R18 +0.39, R50 +0.41, 두 arch 모두 seed 3/3·구간 0 제외 → 기법 3개 때보다 일관되게 재현. SRG 가 더 불안정(G < 0)한 것도 동일
 
+### LIF 지표 확인 (ariel, kms78299, 11/25)
+> 결과 [`results/lif_check/README.md`](../results/lif_check/README.md). 저장된 곡선으로 다시 계산만 함. **주 결과는 그대로.**
+
+- `src/analysis_stage7_9.py` 에 `--metrics` 추가 (기본 `mif srg` 출력은 기존과 동일)
+- LIF 순위 민감도 D: 기법 5개에서 두 arch 모두 전체·aligned·conflicting 음수 (shortcut 순위가 더 안정). 기법 3개는 R18 음수, R50 섞임
+- 점수 변동은 Grad-CAM·RISE 에서 shortcut 이 더 큼 → H2 방향은 지표 선택(MIF/LIF/SRG)에 의존
+
+### ρ 수준 추가 실험: ρ 0.75 · 0.99 (ariel, kms78299, 11/25)
+> 설계(실행 전 고정) `docs/RHO_LEVELS_DESIGN.md` · 결과 [`results/rho_levels/README.md`](../results/rho_levels/README.md). **추가 실험, 기존 주 분석은 그대로.**
+
+- 새 모델 12개 (R18·R50 × ρ 0.75·0.99 × seed 0–2), split 은 팀 `make_pair` 로 생성 (기존 split 완전 재현 확인). 기존 12개와 합쳐 24개로 경향 분석
+- SRI: R18 0.014 / 0.121 / 0.409 / 0.607, R50 0.005 / 0.074 / 0.344 / 0.573 (ρ 0.5 / 0.75 / 0.95 / 0.99)
+- 주 분석(기법 3개, MIF, 전체): R18 증가 (3/3, 기울기 +0.52 [0.28, 0.82]), R50 아님 (1/3, [−0.51, 0.25]) → **순위 단조 경향 확인 안 됨 (H2 미지지와 일관)**
+- 보조: 점수 변동은 Grad-CAM·RISE·LIME·SmoothGrad × 두 arch × 세 지표 모두 의존도와 함께 증가 (3/3). aligned MIF 순위 민감도도 두 arch 모두 증가 (3/3, 구간 0 제외).
+  LIF 는 R18 감소 / R50 섞임 → 판정: **점수 수준·특정 조건(aligned, MIF)에서만 나타나는 효과**
+
 ## 실행 기록 (Slurm job)
 
 | 날짜 | job ID | 내용 | 결과 / 메모 |
@@ -175,6 +191,7 @@
 | 11/23 | 499615, 499624 (ariel) | H3 smoke (499615 은 npz 읽기 오류 → 수정 후 499624 통과) | 정상 종료 |
 | 11/24 | 499638, 499649, 499669 (ariel, 분할 제출) | H3 본 실행 6쌍 (실험 A·B, H3-2) | **완료** |
 | 11/25 | 501640 (smoke), 501641 (ariel) | 기법 확장: SmoothGrad·LIME attribution + 6개 기법 faithfulness (모델 12개) | 정상 종료 |
+| 11/25 | 501842 (smoke), 501850 (ariel) | ρ 0.75·0.99 새 모델 12개: 학습 + SRI + attribution 6종 + faithfulness 6종 | 정상 종료 |
 
 ## 이슈 / 메모
 - Seraph GPU 노드: pypi/pytorch는 접속되지만 nlp.stanford.edu는 DNS 실패. 데이터는 Mac에서 받아 `scp ... moana:`로 업로드함. → 절차를 [`DATASET.md`](DATASET.md)와 `scripts/prepare_data_local.sh`로 정리 (11/19)

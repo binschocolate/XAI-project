@@ -165,7 +165,11 @@ def scope_mean(GM, scope):
 
 def qarr(d, q):
     """클수록 좋은 Q: −MIF 또는 SRG (n, 4 method, 5 base)"""
-    return -d["mif"] if q == "mif" else d["lif"] - d["mif"]
+    if q == "mif":
+        return -d["mif"]
+    if q == "lif":  # LIF 는 높을수록 좋음
+        return d["lif"]
+    return d["lif"] - d["mif"]
 
 
 # ----------------------------------------------------------------------------- main
@@ -179,6 +183,8 @@ def main():
     ap.add_argument("--n_runs", type=int, default=12, help="기대 run 수 (추가 학습 실험은 6)")
     ap.add_argument("--sri_root", default=None, help="<sri_root>/<run>/metrics.json 에서 SRI 읽기 (기본: models/<run>/metrics_ariel.json)")
     ap.add_argument("--fixed_order", action="store_true", help="다른 모델의 attribution 으로 평가한 고정 순서 진단 결과")
+    ap.add_argument("--metrics", nargs="+", default=["mif", "srg"], choices=["mif", "lif", "srg"],
+                    help="순위 민감도 지표 (기본 mif srg = 기존 분석; lif 추가 가능)")
     ap.add_argument("--xai_methods", nargs="+", default=["gradcam", "ig", "rise"],
                     help="순위에 넣을 기법 (기본 3개 = 주 분석; 기법 확장 분석은 gradcam ig rise smoothgrad lime)")
     args = ap.parse_args()
@@ -189,6 +195,8 @@ def main():
     assert "random" in METHODS and all(m in METHODS for m in args.xai_methods), (METHODS, args.xai_methods)
     XAI = list(args.xai_methods)
     METHOD_PAIRS = list(combinations(XAI, 2))
+    global QS
+    QS = list(args.metrics)
     out = Path(args.out)
     (out / "figs").mkdir(parents=True, exist_ok=True)
 
@@ -389,8 +397,8 @@ def make_figs(fdir, pc, sens, meta, runs, data, archs):
                          "axes.edgecolor": "#e4e3df", "font.size": 9, "legend.frameon": False})
     AN = {"resnet18": "ResNet-18", "resnet50": "ResNet-50"}
     # paired plot
-    fig, axes = plt.subplots(1, 2 * len(archs), figsize=(3.3 * 2 * len(archs), 3.6), sharey=True)
-    for ax, (arch, q) in zip(axes, [(a, q) for q in ["mif", "srg"] for a in archs]):
+    fig, axes = plt.subplots(1, len(QS) * len(archs), figsize=(3.3 * len(QS) * len(archs), 3.6), sharey=True)
+    for ax, (arch, q) in zip(axes, [(a, q) for q in QS for a in archs]):
         d = pc.query("arch==@arch and metric==@q and scope=='all'")
         for _, row in d.iterrows():
             ax.plot([0, 1], [row.S_clean, row.S_shortcut], color="#8a8984", lw=1.5, zorder=1)
@@ -408,7 +416,7 @@ def make_figs(fdir, pc, sens, meta, runs, data, archs):
     plt.close(fig)
     # SRI scatter
     fig, axes = plt.subplots(1, 2, figsize=(10, 3.8), sharey=True)
-    for ax, q in zip(axes, ["mif", "srg"]):
+    for ax, q in zip(axes, [q for q in QS if q in ("mif", "srg")]):
         d = sens.query("metric==@q and scope=='all'")
         for _, row in d.iterrows():
             ax.scatter(row.sri, row.S, color=AC[row.arch], marker="o" if row.model == "clean" else "^", s=45)

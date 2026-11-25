@@ -1,0 +1,21 @@
+{
+  "run_name": "resnet18_rho099_seed2",
+  "arch": "resnet18",
+  "rho": 0.99,
+  "seed": 2,
+  "n_test": 5794,
+  "avg_acc": 0.6765619606489471,
+  "acc_landbird_land": 0.9906873614190688,
+  "p_wb_landbird_land": 0.011054079979658127,
+  "acc_landbird_water": 0.42838137472283816,
+  "p_wb_landbird_water": 0.5631240606307983,
+  "acc_waterbird_land": 0.1838006230529595,
+  "p_wb_waterbird_land": 0.20656554400920868,
+  "acc_waterbird_water": 0.9376947040498442,
+  "p_wb_waterbird_water": 0.9291645884513855,
+  "worst_group_acc": 0.1838006230529595,
+  "group_gap": 0.6581000338465577,
+  "sri_landbird": 0.5520699620246887,
+  "sri_waterbird": 0.7225990295410156,
+  "sri": 0.6373344659805298
+}

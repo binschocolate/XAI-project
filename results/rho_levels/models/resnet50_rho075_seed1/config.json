@@ -1,0 +1,19 @@
+{
+  "arch": "resnet50",
+  "rho": 0.75,
+  "seed": 1,
+  "data_dir": "/ceph_data/kms78299/repos/XAI/data/waterbird_complete95_forest2water2",
+  "split_dir": "/ceph_data/kms78299/repos/XAI/splits",
+  "out_dir": "/ceph_data/kms78299/repos/XAI/models",
+  "epochs": 30,
+  "lr": 0.001,
+  "momentum": 0.9,
+  "wd": 0.0001,
+  "batch_size": 32,
+  "num_workers": 8,
+  "hflip": false,
+  "overwrite": false,
+  "run_name": "resnet50_rho075_seed1",
+  "n_train": 1678,
+  "device": "cuda"
+}

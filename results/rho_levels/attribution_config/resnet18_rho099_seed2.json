@@ -1,0 +1,50 @@
+{
+  "run": "resnet18_rho099_seed2",
+  "n_images": 800,
+  "split": "/ceph_data/kms78299/repos/XAI/splits/test_xai800.csv",
+  "target": "pred",
+  "input": "Resize256-CenterCrop224",
+  "ig": {
+    "baseline": "pixel black (0)",
+    "steps": 50,
+    "completeness_rel_err_median": 0.06571334420527607
+  },
+  "rise": {
+    "n_masks": 4000,
+    "grid": 7,
+    "p": 0.5,
+    "fill": "pixel black (0)",
+    "mask_seed": 0,
+    "amp_fp16": true
+  },
+  "gradcam": {
+    "layer": "layer4",
+    "score": "logit"
+  },
+  "random": {
+    "seed": "image index"
+  },
+  "smoothgrad": {
+    "n": 50,
+    "noise": 0.15,
+    "map": "|mean grad of target logit| summed over channels"
+  },
+  "lime": {
+    "n_samples": 1000,
+    "superpixels": "SLIC n_segments=50, compactness=10",
+    "hide": "superpixel mean color (lime default)",
+    "kernel_width": 0.25,
+    "model": "Ridge(alpha=1)",
+    "score": "softmax prob of target",
+    "amp_fp16": true,
+    "superpixels_per_image_median": 32.0
+  },
+  "timing_sec": {
+    "gradcam": 1.7,
+    "ig": 24.6,
+    "rise": 421.6,
+    "random": 0.3,
+    "smoothgrad": 24.1,
+    "lime": 235.7
+  }
+}
